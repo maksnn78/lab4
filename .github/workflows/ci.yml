@@ -18,9 +18,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y cmake g++ clang
 
       - name: Configure project
-        run: |
-          CXX=${{ "{{" }} matrix.compiler == 'gcc' && 'g++' || 'clang++' {{ "}}" }}
-          cmake -S . -B build -DCMAKE_CXX_COMPILER=$CXX
+        run: cmake -S . -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
 
       - name: Build project
         run: cmake --build build
