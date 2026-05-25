@@ -1,7 +1,8 @@
 # Лабораторная работа №4
 ## Аксентьев Максим ИУ8-22
 ## CI Status
-![CI](https://github.com/maksnn78/lab4/actions/workflows/ci.yml/badge.svg)
+![CI Linux](https://github.com/maksnn78/lab4/actions/workflows/ci.yml/badge.svg)
+![CI Windows](https://github.com/maksnn78/lab4/actions/workflows/ci-windows.yml/badge.svg)
 ## Подготовка репозитория
 ```bash
 git clone https://github.com/maksnn78/lab4.git
@@ -74,15 +75,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y cmake g++
+        run: sudo apt-get update && sudo apt-get install -y cmake g++ clang
 
       - name: Configure project
-        run: cmake -S . -B build
+        run: cmake -S . -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
 
       - name: Build project
         run: cmake --build build
@@ -198,4 +202,52 @@ cmake --build build
 [ 90%] Building CXX object solver_application/CMakeFiles/solver_application.dir/equation.cpp.o
 [100%] Linking CXX executable solver_application
 [100%] Built target solver_application
+```
+## Создание ci-windows.yml
+```bash
+nano .github/workflows/ci-windows.yml
+```
+```yaml
+name: CI Windows
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure project
+        run: cmake -S . -B build -G "MinGW Makefiles"
+
+      - name: Build project
+        run: cmake --build build
+```
+## Коммит и пуш
+```bash
+git add .github/workflows/ci.yml .github/workflows/ci-windows.yml
+git commit -m "add matrix CI for gcc/clang and Windows build"
+```
+```bash
+[main b383b2c] add matrix CI for gcc/clang and Windows build
+ 2 files changed, 26 insertions(+), 4 deletions(-)
+ create mode 100644 .github/workflows/ci-windows.yml
+```
+```bash
+git push origin main
+```
+```bash
+Enumerating objects: 10, done.
+Counting objects: 100% (10/10), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (5/5), done.
+Writing objects: 100% (6/6), 790 bytes | 263.00 KiB/s, done.
+Total 6 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/maksnn78/lab4.git
+   1ac5242..e3bb939  main -> main
 ```
